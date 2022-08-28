@@ -48,7 +48,7 @@ const usersSchema = new mongoose.Schema(
       select: false,
     },
     lineId: {
-      type: string,
+      type: String,
       default: false,
       select: false,
     }
