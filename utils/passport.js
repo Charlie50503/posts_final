@@ -1,5 +1,5 @@
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
-const LineStrategy = require("passport-line").Strategy;
+const LineStrategy = require("passport-line-auth").Strategy;
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 
