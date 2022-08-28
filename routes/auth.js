@@ -37,5 +37,14 @@ router.get(
       return next(appError("401", "40001", "Google 認證錯誤"));
     }
   }));
-
+// LINE Strategy
+router.get(
+  "/line",
+  (req, res, next) => {
+    /**
+      * #swagger.ignore = true
+      */
+    authController.line.auth(req, res, next);
+  }
+);
 module.exports = router;
