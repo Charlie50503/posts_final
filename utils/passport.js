@@ -1,4 +1,5 @@
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
+const LineStrategy = require("passport-line").Strategy;
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 
@@ -42,4 +43,14 @@ module.exports = (passport) =>{
       }
     })
   );
+
+  passport.use(new LineStrategy({
+    channelID: process.env.LINE_ID,
+    channelSecret: process.env.LINE_SECRET,
+    callbackURL: process.env.LINE_CALLBACK
+  },
+  function(accessToken, refreshToken, profile, done) {
+    return done(err, user);
+  }
+));
 };
