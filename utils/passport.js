@@ -49,8 +49,8 @@ module.exports = (passport) =>{
       channelID: process.env.LINE_ID,
       channelSecret: process.env.LINE_SECRET,
       callbackURL: process.env.LINE_CALLBACK,
-    }, async (accessToken, refreshToken, profile, done) => {
-      var email = jwt.decode(params.id_token)
+    }, async (accessToken, refreshToken, params, profile, done) => {
+      var email = jwt.decode(params.id_token);
       console.log("email",email);
       const user = await User.findOne({lineId: profile._json.userId});
 
