@@ -44,14 +44,35 @@ module.exports = (passport) =>{
     })
   );
 
-  passport.use(new LineStrategy({
-    channelID: process.env.LINE_ID,
-    channelSecret: process.env.LINE_SECRET,
-    callbackURL: process.env.LINE_CALLBACK
-  },
-  function(accessToken, refreshToken, profile, done) {
-    console.log("profile",profile);
-    return done(err, user);
-  }
-));
+  passport.use(new LineStrategy(
+    {
+      channelID: process.env.LINE_ID,
+      channelSecret: process.env.LINE_SECRET,
+      callbackURL: process.env.LINE_CALLBACK,
+    }, async (accessToken, refreshToken, profile, done) => {
+      var email = jwt.decode(params.id_token)
+      console.log("email",email);
+      const user = await User.findOne({lineId: profile._json.userId});
+
+      if(!user){
+        const randomPassword = Math.random().toString(36).slice(-8);
+        bcrypt.genSalt(10, (err, salt) =>
+          bcrypt.hash(randomPassword, salt, async (err, hash) => {
+            const newUser = await User.create({
+              nickName: profile._json.name,
+              email: profile._json.email,
+              avatar: profile._json.picture || "",
+              password: hash
+            });
+
+            if(newUser){
+              return done(null, newUser);
+            }
+          })
+        );
+      }else{
+        return done(null, user);
+      }
+    })
+  );
 };

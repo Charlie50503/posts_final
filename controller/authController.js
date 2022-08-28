@@ -16,10 +16,12 @@ const authController = {
   line: {
     auth: handleErrorAsync(async (req, res, next) => {
       /* passport authenticate is a middleware */
-      passport.authenticate("line")(req, res, next);
+      passport.authenticate("line",{
+        scope: ["profile","openid", "email"]
+      })(req, res, next);
     }),
     execCallback: handleErrorAsync(async (req, res, next) => {
-      passport.authenticate("line", { failureRedirect: "/login", successRedirect : "/" })(req, res, next);
+      passport.authenticate("line")(req, res, next);
     })
   }
 };
