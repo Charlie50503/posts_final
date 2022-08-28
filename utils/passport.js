@@ -50,19 +50,19 @@ module.exports = (passport) =>{
       channelSecret: process.env.LINE_SECRET,
       callbackURL: process.env.LINE_CALLBACK,
     }, async (accessToken, refreshToken, params, profile, done) => {
-      console.log("params",params);
-      var email = jwt.decode(params.id_token);
-      console.log("email",email);
-      const user = await User.findOne({lineId: profile._json.userId});
-
+      console.log("params", params);
+      var lineUserInfo = jwt.decode(params.id_token);
+      console.log("lineUserInfo", lineUserInfo);
+      const user = await User.findOne({email: lineUserInfo.email});
+      console.log("profile", profile);
       if(!user){
         const randomPassword = Math.random().toString(36).slice(-8);
         bcrypt.genSalt(10, (err, salt) =>
           bcrypt.hash(randomPassword, salt, async (err, hash) => {
             const newUser = await User.create({
-              nickName: profile._json.name,
-              email: profile._json.email,
-              avatar: profile._json.picture || "",
+              nickName: lineUserInfo.name,
+              email: lineUserInfo.email,
+              avatar: lineUserInfo.picture || "",
               password: hash
             });
 
