@@ -50,6 +50,7 @@ module.exports = (passport) =>{
     callbackURL: process.env.LINE_CALLBACK
   },
   function(accessToken, refreshToken, profile, done) {
+    console.log("profile",profile);
     return done(err, user);
   }
 ));
