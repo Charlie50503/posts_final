@@ -1,8 +1,8 @@
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
-const LineStrategy = require("passport-line").Strategy;
+const LineStrategy = require("passport-line-auth").Strategy;
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
-
+const jwt = require("jsonwebtoken");
 module.exports = (passport) =>{
   passport.serializeUser(function (user, done) {
     done(null, user._id);
@@ -44,13 +44,36 @@ module.exports = (passport) =>{
     })
   );
 
-  passport.use(new LineStrategy({
-    channelID: process.env.LINE_ID,
-    channelSecret: process.env.LINE_SECRET,
-    callbackURL: process.env.LINE_CALLBACK
-  },
-  function(accessToken, refreshToken, profile, done) {
-    return done(err, user);
-  }
-));
+  passport.use(new LineStrategy(
+    {
+      channelID: process.env.LINE_ID,
+      channelSecret: process.env.LINE_SECRET,
+      callbackURL: process.env.LINE_CALLBACK,
+    }, async (accessToken, refreshToken, params, profile, done) => {
+      console.log("params", params);
+      var lineUserInfo = jwt.decode(params.id_token);
+      console.log("lineUserInfo", lineUserInfo);
+      const user = await User.findOne({email: lineUserInfo.email});
+      console.log("profile", profile);
+      if(!user){
+        const randomPassword = Math.random().toString(36).slice(-8);
+        bcrypt.genSalt(10, (err, salt) =>
+          bcrypt.hash(randomPassword, salt, async (err, hash) => {
+            const newUser = await User.create({
+              nickName: lineUserInfo.name,
+              email: lineUserInfo.email,
+              avatar: lineUserInfo.picture || "",
+              password: hash
+            });
+
+            if(newUser){
+              return done(null, newUser);
+            }
+          })
+        );
+      }else{
+        return done(null, user);
+      }
+    })
+  );
 };
